@@ -69,7 +69,8 @@ export default function QuickTranslate({
   const activeRequestController = useRef(null);
 
   // ── Translation state ──
-  const [status, setStatus] = useState(initialDraft.status === 'Recording…' ? 'Ready' : (initialDraft.status || 'Ready'));
+  const _BUSY = new Set(['Recording…', 'Transcribing…', 'Translating…', 'Listening…']);
+  const [status, setStatus] = useState(_BUSY.has(initialDraft.status) ? 'Ready' : (initialDraft.status || 'Ready'));
   const [transcript, setTranscript] = useState(initialDraft.transcript || '');
   const [editedTranscript, setEditedTranscript] = useState(initialDraft.editedTranscript || '');
   const [isEditingTranscript, setIsEditingTranscript] = useState(false);
@@ -273,7 +274,7 @@ export default function QuickTranslate({
       formData.append('tts_provider', ttsProvider || 'elevenlabs');
       if (preferLocalMode) formData.append('prefer_local', 'true');
 
-      const response = await fetch('${API_BASE}/api/translate-multi', {
+      const response = await fetch(`${API_BASE}/api/translate-multi`, {
         method: 'POST',
         body: formData,
         signal: controller.signal,
@@ -689,10 +690,10 @@ export default function QuickTranslate({
           )}
 
           {/* Top Panel: Source Input */}
-          <section className="bg-surface-container-low rounded-2xl border border-outline-variant/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] flex flex-col overflow-hidden relative group min-h-[280px]">
+          <section className="bg-surface-container-low rounded-2xl border border-outline-variant/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] flex flex-col overflow-hidden relative group min-h-[180px]">
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] rounded-full -mr-32 -mt-32 transition-opacity group-hover:opacity-100 opacity-50 pointer-events-none"></div>
             
-            <div className="flex items-center justify-between border-b border-outline-variant/10 px-6 py-4 bg-surface-container-lowest/50 relative z-10">
+            <div className="flex items-center justify-between border-b border-outline-variant/10 px-6 py-2.5 bg-surface-container-lowest/50 relative z-10">
               <div className="flex items-center gap-4">
                 <span className="text-xs font-bold text-primary uppercase tracking-widest">Source Input</span>
                 {detectedLang && (
@@ -724,49 +725,49 @@ export default function QuickTranslate({
               </div>
             </div>
 
-            <div className="flex-1 p-6 flex flex-col relative z-10">
+            <div className="flex-1 p-4 flex flex-col relative z-10">
               {inputMode === 'speak' ? (
-                <div className="flex-1 flex flex-col items-center justify-center gap-6">
+                <div className="flex-1 flex flex-row items-center justify-center gap-6">
                   {!isRecording ? (
                     <>
-                      <button 
-                        className={`w-24 h-24 rounded-full bg-gradient-to-br from-primary/10 to-primary-container/10 border-2 border-primary/20 flex items-center justify-center hover:scale-105 hover:border-primary/40 hover:shadow-[0_0_30px_rgba(173,198,255,0.15)] transition-all duration-300 group ${isBusy ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      <button
+                        className={`w-16 h-16 rounded-full bg-gradient-to-br from-primary/10 to-primary-container/10 border-2 border-primary/20 flex items-center justify-center hover:scale-105 hover:border-primary/40 hover:shadow-[0_0_30px_rgba(173,198,255,0.15)] transition-all duration-300 group shrink-0 ${isBusy ? 'opacity-50 cursor-not-allowed' : ''}`}
                         onClick={startRecording}
                         disabled={isBusy}
                       >
-                        <span className="material-symbols-outlined text-5xl text-primary group-hover:drop-shadow-[0_0_12px_#ADC6FF] transition-all">mic</span>
+                        <span className="material-symbols-outlined text-3xl text-primary group-hover:drop-shadow-[0_0_12px_#ADC6FF] transition-all">mic</span>
                       </button>
                       <p className="text-sm font-medium text-on-surface-variant">Tap to start speaking</p>
                     </>
                   ) : (
                     <>
-                      <div className="relative">
+                      <div className="relative shrink-0">
                         <div className="absolute inset-0 bg-error/20 rounded-full animate-ping"></div>
-                        <div className="w-24 h-24 rounded-full bg-error/10 border-2 border-error/50 flex items-center justify-center relative">
-                          <span className="material-symbols-outlined text-5xl text-error drop-shadow-[0_0_12px_#FFB4AB] animate-pulse">mic</span>
+                        <div className="w-16 h-16 rounded-full bg-error/10 border-2 border-error/50 flex items-center justify-center relative">
+                          <span className="material-symbols-outlined text-3xl text-error drop-shadow-[0_0_12px_#FFB4AB] animate-pulse">mic</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <button className="flex items-center gap-2 px-6 py-3 bg-surface-container-highest text-error font-bold rounded-xl hover:bg-error/20 transition-all shadow-lg" onClick={stopRecording}>
+                      <div className="flex items-center gap-3">
+                        <button className="flex items-center gap-2 px-4 py-2 bg-surface-container-highest text-error font-bold rounded-xl hover:bg-error/20 transition-all shadow-lg text-sm" onClick={stopRecording}>
                           <span className="material-symbols-outlined text-sm">stop_circle</span> Stop & Translate
                         </button>
-                        <button className="flex items-center gap-2 px-6 py-3 bg-surface-container-highest text-on-surface-variant font-bold rounded-xl hover:text-on-surface transition-all shadow-lg" onClick={cancelRecording}>
+                        <button className="flex items-center gap-2 px-4 py-2 bg-surface-container-highest text-on-surface-variant font-bold rounded-xl hover:text-on-surface transition-all shadow-lg text-sm" onClick={cancelRecording}>
                           <span className="material-symbols-outlined text-sm">close</span> Cancel
                         </button>
                       </div>
                     </>
                   )}
                   {transcript && !isRecording && (
-                    <div className="w-full mt-4 p-4 bg-surface-container-lowest/50 rounded-xl border border-outline-variant/10">
+                    <div className="flex-1 p-3 bg-surface-container-lowest/50 rounded-xl border border-outline-variant/10">
                       {isEditingTranscript ? (
                         <textarea
-                          className="w-full bg-surface-container-high border-none rounded-lg text-sm p-4 text-on-surface focus:ring-1 focus:ring-primary/40 outline-none resize-none"
+                          className="w-full bg-surface-container-high border-none rounded-lg text-sm p-3 text-on-surface focus:ring-1 focus:ring-primary/40 outline-none resize-none"
                           value={editedTranscript}
                           onChange={(e) => setEditedTranscript(e.target.value)}
-                          rows={3}
+                          rows={2}
                         />
                       ) : (
-                        <p className="text-on-surface leading-relaxed text-[15px]">{transcript}</p>
+                        <p className="text-on-surface leading-relaxed text-[14px]">{transcript}</p>
                       )}
                     </div>
                   )}
@@ -803,6 +804,9 @@ export default function QuickTranslate({
                       </button>
                       <button className="w-8 h-8 rounded-full flex items-center justify-center bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all" onClick={restartInputAudio}>
                         <span className="material-symbols-outlined text-[16px]">replay</span>
+                      </button>
+                      <button className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-1.5" onClick={() => downloadMp3(inputAudioUrl, 'recording.webm')}>
+                        <span className="material-symbols-outlined text-[14px]">download</span> Audio
                       </button>
                       <div className="w-px h-4 bg-outline-variant/20"></div>
                     </>

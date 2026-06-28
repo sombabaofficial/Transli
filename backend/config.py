@@ -8,7 +8,7 @@ class Config:
     ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
     
     # Model Configurations
-    GEMINI_MODEL = "gemini-2.5-flash"
+    GEMINI_MODEL = "gemini-2.0-flash-lite"
     ELEVENLABS_STT_MODEL = "scribe_v1"
     
     # ElevenLabs TTS Configurations
