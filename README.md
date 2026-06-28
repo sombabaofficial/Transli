@@ -1,139 +1,146 @@
-```text
-   ████████╗██████╗  █████╗ ███╗   ██╗███████╗██╗     ██╗
-   ╚══██╔══╝██╔══██╗██╔══██╗████╗  ██║██╔════╝██║     ██║
-      ██║   ██████╔╝███████║██╔██╗ ██║███████╗██║     ██║
-      ██║   ██╔══██╗██╔══██║██║╚██╗██║╚════██║██║     ██║
-      ██║   ██║  ██║██║  ██║██║ ╚████║███████║███████╗██║
-      ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝╚═╝
-```
-
 <div align="center">
 
-**Real-time multi-modal speech translation with hybrid cloud and local AI.**
+```
+████████╗██████╗  █████╗ ███╗   ██╗███████╗██╗     ██╗
+╚══██╔══╝██╔══██╗██╔══██╗████╗  ██║██╔════╝██║     ██║
+   ██║   ██████╔╝███████║██╔██╗ ██║███████╗██║     ██║
+   ██║   ██╔══██╗██╔══██║██║╚██╗██║╚════██║██║     ██║
+   ██║   ██║  ██║██║  ██║██║ ╚████║███████║███████╗██║
+   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝╚═╝
+```
 
-[![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-green?logo=fastapi)](https://fastapi.tiangolo.com)
-[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+### Real-time AI Voice Translation — speak once, hear it in any language.
 
-*Speak in one language. Hear it back in another. Skip the copy-paste translation loop.*
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
+[![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4-38BDF8?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge)](LICENSE)
+
+[Live Demo](#deployment) · [Quick Start](#quick-start) · [Features](#features) · [Benchmarks](#provider-benchmark)
 
 </div>
 
 ---
 
-## The Real Bottleneck in Cross-Language Communication
+## What is Transli?
 
-Every translation tool on the market gives you a text box and a swap button. Almost none of them solve the part that actually breaks the flow:
+Transli is a full-stack AI translation platform that goes beyond text boxes and swap buttons. It closes the **full speech loop** — you speak, it transcribes, translates, and speaks back in the target language.
 
-> You're in a meeting with someone who speaks Hindi. You pull out your phone, open a translator, type what you want to say, copy the result, read it out loud — badly — and wait while they do the same thing back. The conversation dies somewhere between the third tab switch and the autocorrect mishap.
->
-> Or you have a PDF invoice in Spanish. You copy-paste paragraphs into Google Translate, lose the formatting, guess at the context, and end up with something that's technically translated but practically useless.
+Every piece of the pipeline is swappable at runtime between **cloud** and **local** providers. You can run it entirely offline with no API keys, or hook it up to ElevenLabs and Gemini for maximum quality. The fastest fully-local configuration completes the entire voice-in → voice-out loop in **1.49 seconds**.
 
-That's not translation. That's friction with a language dropdown.
-
-The bottleneck in multilingual communication has never been about translation accuracy alone. It's about **getting speech in and translated speech out without breaking the conversational flow**. If your tool still expects a human to type, copy, paste, and read aloud, you haven't solved the problem — you've just moved the dictionary into a browser.
-
-**Transli attacks that bottleneck directly.**
-
-You speak into the mic. The AI hears it, transcribes it, translates it, and speaks it back in the target language. The whole loop — voice in, voice out — completes in 1.5 to 9.6 seconds depending on the provider combination.
+> **Built for:** NIT Agartala Final Year Project — targeting impact for 2000+ students across language barriers in academia, research, and cross-regional communication.
 
 ---
 
-## How It Works
+## The Problem
 
-```text
-   ┌──────────────────────────┐
-   │  Speak into Browser Mic   │
-   └──────────┬───────────────┘
-              │
-              ▼
-   ┌──────────────────────────────────┐
-   │  Speech-to-Text (STT)            │
-   │  → ElevenLabs Scribe (cloud)     │
-   │  → OpenAI Whisper base (local)   │
-   └──────────┬───────────────────────┘
-              │
-              ▼
-   ┌──────────────────────────────────┐
-   │  Translation                     │
-   │  → Gemini 2.5 Flash (cloud)      │
-   │  → Meta NLLB-200 600M (local)    │
-   │  → glossary + context injection  │
-   └──────────┬───────────────────────┘
-              │
-              ▼
-   ┌──────────────────────────────────┐
-   │  Text-to-Speech (TTS)            │
-   │  → ElevenLabs (cloud)            │
-   │  → Piper ONNX (local, CPU)       │
-   │  → gTTS (free fallback)          │
-   └──────────┬───────────────────────┘
-              │
-              ▼
-   ┌──────────────────────────────────┐
-   │  Play Translated Audio            │
-   │  → display transcript            │
-   │  → save to history               │
-   └──────────────────────────────────┘
+Every translation tool gives you a text box. None of them solve the part that actually breaks conversations:
+
+```
+You want to say something in Hindi
+→ Open phone
+→ Type it out
+→ Copy the translation
+→ Read it aloud (badly)
+→ Wait while the other person does the same
+→ The conversation dies
 ```
 
-The entire user flow: **Speak → Translate → Listen → Done.**
+That's friction, not translation. **Transli removes every manual step in that loop.**
 
 ---
 
 ## Features
 
-**Quick Translate** — Speak into the mic or type text. Get back a transcript, translation, and synthesized audio. Supports one-to-many mode: translate into Hindi, French, and German simultaneously with independent audio per language.
+| | Feature | Description |
+|---|---|---|
+| 🎙️ | **Quick Translate** | Speak or type — get transcript, translation, and synthesized audio instantly. One-to-many mode translates into up to 10 languages simultaneously. |
+| 💬 | **Live Conversation** | Alternating bilingual conversation with context memory. AI maintains pronoun consistency and topic flow across turns. |
+| 📄 | **File & Document Translation** | Upload PDF, DOCX, TXT, or images. OCR extracts text from images. Side-by-side output with download. |
+| 🔁 | **Provider Switching** | Swap STT, translation, and TTS engines at runtime — no restart needed. 12 tested combinations. |
+| 📖 | **Custom Glossary** | Define term mappings (e.g. `ISRO = ISRO`). Enforced in every translation via prompt injection or post-processing. |
+| ⚡ | **Fully Offline Mode** | Whisper + NLLB + Piper — no API keys, no internet. Benchmarked at 1.49s end-to-end. |
+| 🧠 | **AI Session Summaries** | One click generates a plain-language Gemini summary of the entire conversation. |
+| 📜 | **Translation History** | Auto-saved to localStorage. Search, filter, export as `.txt` or `.json`. |
 
-**Live Conversation** — Two speakers, two languages, alternating turns. Context from recent turns is passed to the AI so pronouns and references stay consistent across the conversation.
+---
 
-**File & Document Translation** — Upload a PDF, Word doc, plain text file, or image. Transli extracts content (OCR for images) and translates it with side-by-side display and downloadable output.
+## How It Works
 
-**Custom Glossary** — Define term pairs like `NIT = NIT` or `neural network = न्यूरल नेटवर्क`. Terms are enforced in every translation — injected into Gemini's prompt or applied as post-processing for NLLB.
-
-**Session Summaries** — After a live session, click Summarize. Gemini generates a plain-language summary of everything discussed.
-
-**Provider Switching at Runtime** — Choose between cloud and local AI for each pipeline stage without restarting the server. Mix and match: ElevenLabs or Whisper for STT, Gemini or NLLB for translation, ElevenLabs/Piper/gTTS for TTS.
-
-**Fully Offline Mode** — Whisper + NLLB + Piper. No API keys, no internet, benchmarked at **1.49s total**. Fastest configuration.
-
-**Translation History** — Every session is saved to browser localStorage with full metadata. Export as `.txt` or `.json`.
+```
+  🎤 Speak
+      │
+      ▼
+  ┌─────────────────────────────────────┐
+  │  Speech-to-Text (STT)               │
+  │  ├─ ElevenLabs Scribe v1  (cloud)   │
+  │  └─ OpenAI Whisper base   (local)   │
+  └──────────────────┬──────────────────┘
+                     │
+                     ▼
+  ┌─────────────────────────────────────┐
+  │  Translation                        │
+  │  ├─ Google Gemini 2.5 Flash (cloud) │
+  │  └─ Meta NLLB-200 600M     (local)  │
+  │       + glossary + context memory   │
+  └──────────────────┬──────────────────┘
+                     │
+                     ▼
+  ┌─────────────────────────────────────┐
+  │  Text-to-Speech (TTS)               │
+  │  ├─ ElevenLabs multilingual (cloud) │
+  │  ├─ Piper ONNX              (local) │
+  │  └─ gTTS                  (free)    │
+  └──────────────────┬──────────────────┘
+                     │
+                     ▼
+  🔊 Hear it in the target language
+```
 
 ---
 
 ## Tech Stack
 
+<div align="center">
+
 | Layer | Technology |
-|---|---|
-| Frontend | React 19, Vite, Tailwind CSS 4 |
-| Backend | Python 3.11, FastAPI, Uvicorn |
-| STT | ElevenLabs Scribe v1, OpenAI Whisper |
-| Translation | Google Gemini 2.5 Flash, Meta NLLB-200 |
-| TTS | ElevenLabs, Piper ONNX, gTTS |
-| OCR | Tesseract + Pillow |
-| Documents | PyPDF2, python-docx |
-| Audio | FFmpeg |
-| GPU | CUDA (Whisper + NLLB), CPU (Piper) |
+|:---|:---|
+| **Frontend** | React 19, Vite, Tailwind CSS 4, Lucide Icons |
+| **Backend** | Python 3.11, FastAPI, Uvicorn, asyncio |
+| **STT** | ElevenLabs Scribe v1, OpenAI Whisper (CUDA) |
+| **Translation** | Google Gemini 2.5 Flash, Meta NLLB-200-distilled-600M |
+| **TTS** | ElevenLabs multilingual v2, Piper ONNX, gTTS |
+| **Documents** | PyPDF2, python-docx, Pillow + Tesseract OCR |
+| **Audio** | FFmpeg (WAV → MP3 conversion) |
+| **GPU** | CUDA for Whisper & NLLB · CPU for Piper |
+
+</div>
 
 ---
 
 ## Supported Languages
 
-| Indian | International |
-|---|---|
-| English, Hindi, Bengali, Telugu | Chinese (Simplified & Traditional) |
-| Marathi, Tamil, Urdu, Gujarati | French, German, Russian |
-| Punjabi, Sanskrit | Japanese, Korean, Arabic |
+<div align="center">
+
+| Indian Languages | International Languages |
+|:---|:---|
+| English · Hindi · Bengali · Telugu | Chinese Simplified · Chinese Traditional |
+| Marathi · Tamil · Urdu · Gujarati | French · German · Russian |
+| Punjabi · Sanskrit | Japanese · Korean · Arabic |
+
+**18 languages total · 12 provider combinations · All tested**
+
+</div>
 
 ---
 
 ## Provider Benchmark
 
-All 12 provider combinations tested on the same audio clip.
+All 12 STT × Translation × TTS combinations tested on the same audio clip.
 
-| # | STT | Translation | TTS | Total |
-|---|---|---|---|---|
+| # | STT | Translation | TTS | Total Time |
+|:---:|:---|:---|:---|:---:|
 | 1 | ElevenLabs | Gemini | ElevenLabs | 9.64s |
 | 2 | ElevenLabs | Gemini | Piper | 20.31s |
 | 3 | ElevenLabs | Gemini | gTTS | 15.27s |
@@ -144,74 +151,69 @@ All 12 provider combinations tested on the same audio clip.
 | 8 | Whisper | Gemini | Piper | 7.06s |
 | 9 | Whisper | Gemini | gTTS | 15.28s |
 | 10 | Whisper | NLLB | ElevenLabs | 6.92s |
-| **11** | **Whisper** | **NLLB** | **Piper** | **1.49s ⚡** |
+| **11** ⚡ | **Whisper** | **NLLB** | **Piper** | **1.49s** |
 | 12 | Whisper | NLLB | gTTS | 14.00s |
 
-**Fastest overall** — #11 (Whisper + NLLB + Piper): 1.49s. Fully local, fully free, fully offline.  
-**Best cloud hybrid** — #8 (Whisper + Gemini + Piper): 7.06s. Fast local STT, intelligent context-aware translation, free local TTS.
+> **⚡ Fastest** — #11 (Whisper + NLLB + Piper): **1.49s** — fully local, fully free, fully offline.  
+> **☁️ Best Cloud Hybrid** — #8 (Whisper + Gemini + Piper): **7.06s** — local STT, intelligent translation, free TTS.
 
 ---
 
-## Local Setup
+## Quick Start
 
 ### Prerequisites
 
-- Python 3.11+
-- Node.js 18+
-- FFmpeg
-- (Optional) NVIDIA GPU with CUDA for Whisper and NLLB local models
-
-**Install FFmpeg:**
+- Python 3.11+, Node.js 18+, Git
+- FFmpeg installed and on PATH
+- *(Optional)* NVIDIA GPU with CUDA drivers — for fast local Whisper + NLLB
 
 ```bash
+# Install FFmpeg
 # Ubuntu/Debian
-sudo apt update && sudo apt install -y ffmpeg tesseract-ocr
+sudo apt install -y ffmpeg tesseract-ocr
 
 # macOS
 brew install ffmpeg tesseract
 
-# Windows — download from https://ffmpeg.org/download.html and add to PATH
+# Windows — https://ffmpeg.org/download.html → add bin/ folder to PATH
 ```
 
-### 1. Clone the repo
+### 1 — Clone
 
 ```bash
 git clone https://github.com/sombabaofficial/Transli.git
 cd Transli
 ```
 
-### 2. Backend setup
+### 2 — Backend
 
 ```bash
 cd backend
+
+# Create virtual environment
 python -m venv venv
+source venv/bin/activate   # Windows: venv\Scripts\activate
 
-# Linux/macOS
-source venv/bin/activate
-
-# Windows
-venv\Scripts\activate
-
+# Install dependencies
 pip install -r requirements.txt
+
+# Set API keys (skip this if using fully local mode)
+cp .env.example .env
+# Edit .env and add your keys
 ```
 
-Create your `.env` file:
-
-```bash
+```env
 # backend/.env
-GEMINI_API_KEY="your-google-gemini-api-key"
-ELEVENLABS_API_KEY="your-elevenlabs-api-key"
+GEMINI_API_KEY="your-gemini-api-key"        # free at aistudio.google.com
+ELEVENLABS_API_KEY="your-elevenlabs-key"    # free tier at elevenlabs.io
 ```
 
-> API keys are optional if you use fully local providers (Whisper + NLLB + Piper). Get Gemini free at [aistudio.google.com](https://aistudio.google.com). Get ElevenLabs at [elevenlabs.io](https://elevenlabs.io).
-
-Start the backend:
-
 ```bash
+# Start backend
 uvicorn main:app --reload --port 8000
 ```
 
-### 3. Frontend setup
+### 3 — Frontend
 
 ```bash
 cd frontend
@@ -219,39 +221,119 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173).
+Open **http://localhost:5173** and speak your first translation.
 
 ---
 
 ## Deployment
 
-### Backend → Render.com
+### Backend → [Render.com](https://render.com) (free tier)
 
-1. Connect your GitHub repo at [render.com](https://render.com)
-2. **Root Directory:** `backend`
-3. **Build Command:** `pip install -r requirements.txt`
-4. **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
-5. Add environment variables: `GEMINI_API_KEY`, `ELEVENLABS_API_KEY`, `FRONTEND_URL`
+| Setting | Value |
+|---|---|
+| Root Directory | `backend` |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `uvicorn main:app --host 0.0.0.0 --port $PORT` |
 
-### Frontend → Vercel.com
+**Environment Variables to set:**
+- `GEMINI_API_KEY`
+- `ELEVENLABS_API_KEY`
+- `FRONTEND_URL` ← your Vercel URL (for CORS)
 
-1. Import your repo at [vercel.com](https://vercel.com)
-2. **Root Directory:** `frontend`
-3. Add environment variable: `VITE_API_URL` = your Render backend URL
+### Frontend → [Vercel.com](https://vercel.com) (free tier)
 
-> On free-tier hosting (no GPU), use Gemini + ElevenLabs providers. Local models (Whisper, NLLB, Piper) require CUDA GPU.
+| Setting | Value |
+|---|---|
+| Root Directory | `frontend` |
+| Build Command | `npm run build` |
+| Output Directory | `dist` |
+
+**Environment Variables to set:**
+- `VITE_API_URL` ← your Render backend URL
+
+> **Note:** Free cloud hosting has no GPU. Set providers to **Gemini** (translation) and **ElevenLabs** (STT/TTS) for cloud deployment. Local models require CUDA.
 
 ---
 
-## Architecture Notes
+## Project Structure
 
-The React frontend handles recording, playback, and UI state. The FastAPI backend is a provider abstraction layer — it keeps API keys server-side, dispatches to the correct model, and handles fallbacks automatically (NLLB → Gemini on unsupported input; ElevenLabs TTS → gTTS on failure). Whisper and NLLB run on CUDA when available, CPU otherwise. Piper runs on CPU intentionally to keep GPU memory free for inference models. Parallel translation across multiple target languages is handled with `asyncio.gather()` — wall-clock time equals the slowest single translation, not the sum.
+```
+Transli/
+├── backend/
+│   ├── main.py                  # FastAPI app, all endpoints
+│   ├── config.py                # API key config
+│   ├── language_catalog.py      # Supported language definitions
+│   ├── requirements.txt
+│   ├── piper_voices/            # Local ONNX voice models
+│   └── services/
+│       ├── stt.py               # STT dispatcher
+│       ├── stt_whisper.py       # Local Whisper (CUDA)
+│       ├── stt_elevenlabs.py    # Cloud STT
+│       ├── translation.py       # Translation dispatcher
+│       ├── translation_gemini.py# Cloud Gemini translation
+│       ├── translation_nllb.py  # Local NLLB-200 (CUDA)
+│       ├── tts.py               # TTS dispatcher
+│       ├── tts_piper.py         # Local Piper ONNX
+│       └── text_extract.py      # PDF/DOCX/image extraction
+├── frontend/
+│   └── src/
+│       ├── pages/
+│       │   ├── QuickTranslate.jsx
+│       │   ├── LiveConversation.jsx
+│       │   ├── FileTranslation.jsx
+│       │   └── HistoryDownloads.jsx
+│       └── config/
+│           ├── api.js           # Central API base URL
+│           └── languages.js     # Language list
+├── render.yaml                  # Render deployment config
+└── README.md
+```
+
+---
+
+## Architecture Decisions
+
+**Provider Abstraction** — Every pipeline stage (STT, translation, TTS) has a dispatcher that routes to the selected provider and handles fallbacks. Swapping providers requires no code changes — just a settings toggle in the UI.
+
+**Parallel Multi-language** — `asyncio.gather()` runs all target language translations and TTS calls concurrently. Total wall-clock time = slowest single language, not the sum.
+
+**NLLB Chunking** — NLLB-200 is a sentence-pair model best suited for ≤150 tokens. Long inputs are split at sentence boundaries before inference to prevent silent sentence drops.
+
+**GPU Strategy** — Whisper and NLLB run on CUDA (GPU) for speed. Piper runs on CPU intentionally to keep VRAM free for the inference models. Falls back to CPU automatically if no GPU is detected.
+
+**Smart Fallbacks** — NLLB falls back to Gemini if it detects Romanized Indian text (which it cannot handle). ElevenLabs TTS falls back to gTTS on any API failure.
+
+---
+
+## Contributing
+
+Pull requests are welcome.
+
+1. Fork the repo
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Commit your changes: `git commit -m 'Add your feature'`
+4. Push: `git push origin feature/your-feature`
+5. Open a Pull Request
+
+Please keep PRs focused — one feature or fix per PR.
+
+---
+
+## Acknowledgements
+
+- [OpenAI Whisper](https://github.com/openai/whisper) — open-source speech recognition
+- [Meta NLLB-200](https://huggingface.co/facebook/nllb-200-distilled-600M) — multilingual neural machine translation
+- [Piper TTS](https://github.com/rhasspy/piper) — fast local text-to-speech
+- [ElevenLabs](https://elevenlabs.io) — high-quality cloud STT and TTS
+- [Google Gemini](https://aistudio.google.com) — context-aware translation and summarization
 
 ---
 
 ## License
 
-MIT License. See [`LICENSE`](LICENSE) for details.
+MIT License © 2025 [Somesh Raj](https://github.com/sombabaofficial)
+
+See [`LICENSE`](LICENSE) for full terms.
 
 ---
 
@@ -259,6 +341,6 @@ MIT License. See [`LICENSE`](LICENSE) for details.
 
 **Stop typing what you want to say.**
 
-[Get Started with Transli →](https://github.com/sombabaofficial/Transli)
+[⭐ Star this repo](https://github.com/sombabaofficial/Transli) · [Report a Bug](https://github.com/sombabaofficial/Transli/issues) · [Request a Feature](https://github.com/sombabaofficial/Transli/issues)
 
 </div>
