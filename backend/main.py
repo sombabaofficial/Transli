@@ -41,22 +41,19 @@ app.add_middleware(
 # Nothing here changes model settings, accuracy, or inference behaviour.
 
 async def _run_warmup():
-    from services.stt_whisper import get_whisper_model
-    from services.translation_nllb import get_nllb_resources, translate_nllb
-    from services.tts_piper import get_piper_voice, piper_tts
-
     print("[WARMUP] Pre-loading local models in background...")
 
     try:
+        from services.stt_whisper import get_whisper_model
         await asyncio.to_thread(get_whisper_model, "base")
         print("[WARMUP] Whisper ready")
     except Exception as e:
         print(f"[WARMUP] Whisper skipped: {e}")
 
     try:
+        from services.translation_nllb import get_nllb_resources, translate_nllb
         await asyncio.to_thread(get_nllb_resources)
         print("[WARMUP] NLLB weights loaded — running inference warmup...")
-        # Fire a short dummy translation to compile CUDA kernels now, not on first real request
         await translate_nllb("Hello.", "en", "hi")
         print("[WARMUP] NLLB inference kernels compiled and ready")
     except Exception as e:
@@ -64,13 +61,14 @@ async def _run_warmup():
 
     for lang in ("en", "hi"):
         try:
+            from services.tts_piper import get_piper_voice
             await asyncio.to_thread(get_piper_voice, lang)
             print(f"[WARMUP] Piper voice ready: {lang}")
         except Exception as e:
             print(f"[WARMUP] Piper voice skipped ({lang}): {e}")
 
     try:
-        # Compile Piper's ONNX graph on first synthesis so it's not counted against first request
+        from services.tts_piper import piper_tts
         await piper_tts("Hello.", "en")
         print("[WARMUP] Piper synthesis ready")
     except Exception as e:
