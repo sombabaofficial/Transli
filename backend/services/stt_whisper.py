@@ -8,7 +8,7 @@ import torch
 torch.backends.cudnn.benchmark = True
 torch.set_float32_matmul_precision("high")  # enables TF32 on Ampere GPUs
 
-_DEVICE = "cuda"
+_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Global model cache to avoid reloading on every request
 _model_cache = {}
@@ -60,7 +60,7 @@ async def transcribe_whisper(file_path: str, source_lang: str, model_name: str =
         # Reverse-normalize: Whisper returns "zh" — keep app codes consistent
         if source_lang in ("zh-CN", "zh-TW") and detected_lang == "zh":
             detected_lang = source_lang
-        print(f"[DEBUG WHISPER] Transcription successful (detected={detected_lang}): {text[:20]}...")
+        print(f"[DEBUG WHISPER] Transcription successful (detected={detected_lang}, len={len(text)})")
         return text, detected_lang
     except Exception as e:
         raise ValueError(f"Whisper Local Error: {str(e)}")

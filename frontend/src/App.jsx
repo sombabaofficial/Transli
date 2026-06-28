@@ -26,9 +26,21 @@ export default function App() {
   const [activePage, setActivePage] = useState('quick');
   
   // Global Translation Settings State (Providers only)
-  const [sttProvider, setSttProvider] = useState('elevenlabs');
-  const [translationProvider, setTranslationProvider] = useState('gemini'); // Best default for intelligence features
-  const [ttsProvider, setTtsProvider] = useState('elevenlabs');
+  const [sttProvider, setSttProvider] = useState(() => localStorage.getItem('stt_provider') || 'elevenlabs');
+  const [translationProvider, setTranslationProvider] = useState(() => localStorage.getItem('translation_provider') || 'gemini'); // Best default for intelligence features
+  const [ttsProvider, setTtsProvider] = useState(() => localStorage.getItem('tts_provider') || 'elevenlabs');
+
+  useEffect(() => {
+    localStorage.setItem('stt_provider', sttProvider);
+  }, [sttProvider]);
+
+  useEffect(() => {
+    localStorage.setItem('translation_provider', translationProvider);
+  }, [translationProvider]);
+
+  useEffect(() => {
+    localStorage.setItem('tts_provider', ttsProvider);
+  }, [ttsProvider]);
   
   // Persistent History State — loaded from localStorage on mount
   const [history, setHistory] = useState([]);

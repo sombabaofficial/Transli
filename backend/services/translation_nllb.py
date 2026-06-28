@@ -4,10 +4,8 @@ import threading
 import torch
 from typing import Optional as _Optional
 
-if not torch.cuda.is_available():
-    raise RuntimeError("NLLB requires a CUDA GPU. No GPU detected.")
-_DEVICE = "cuda"
-_DTYPE  = torch.float16
+_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+_DTYPE  = torch.float32 if _DEVICE == "cpu" else torch.float32
 
 # Global cache for NLLB
 _nllb_cache = {}
@@ -218,7 +216,7 @@ async def translate_nllb(text: str, source_lang: str, target_lang: str, glossary
             print(f"[DEBUG NLLB] Translating {len(chunks)} chunk(s)...")
             res = " ".join(_translate_chunk(c) for c in chunks)
 
-            print(f"[DEBUG NLLB] Generation successful: {res[:20]}...")
+            print(f"[DEBUG NLLB] Generation successful (len={len(res)})")
             return res
 
         async with _get_inference_semaphore():

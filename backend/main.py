@@ -1,4 +1,8 @@
 import os
+import platform
+if platform.system() == "Windows":
+    os.environ["PATH"] += os.pathsep + r"C:\Users\somba\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.1-full_build\bin"
+
 import time
 import json
 import asyncio
@@ -15,9 +19,17 @@ from services.tts import generate_speech
 app = FastAPI(title="AI Voice Translator API")
 
 # Harden CORS for frontend integration correctly
+_ALLOWED_ORIGINS = [
+    "http://localhost:5173", "http://127.0.0.1:5173",
+    "http://localhost:5174", "http://127.0.0.1:5174",
+]
+_FRONTEND_URL = os.getenv("FRONTEND_URL", "")
+if _FRONTEND_URL:
+    _ALLOWED_ORIGINS.append(_FRONTEND_URL)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5174", "http://127.0.0.1:5174"],
+    allow_origins=_ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -78,9 +90,9 @@ async def translate_audio_endpoint(
     text: str = Form(""),
     source_lang: str = Form("en"),
     target_lang: str = Form("hi"),
-    stt_provider: str = Form("elevenlabs"),
-    translation_provider: str = Form("gemini"),
-    tts_provider: str = Form("elevenlabs"),
+    stt_provider: str = Form("whisper"),
+    translation_provider: str = Form("nllb"),
+    tts_provider: str = Form("piper"),
     context_text: str = Form(""),
     glossary: str = Form(""),
     voice_id: str = Form("")
@@ -170,9 +182,9 @@ async def translate_multi_endpoint(
     text: str = Form(""),
     source_lang: str = Form("en"),
     target_langs: str = Form("hi"), # comma separated
-    stt_provider: str = Form("elevenlabs"),
-    translation_provider: str = Form("gemini"),
-    tts_provider: str = Form("elevenlabs"),
+    stt_provider: str = Form("whisper"),
+    translation_provider: str = Form("nllb"),
+    tts_provider: str = Form("piper"),
     context_text: str = Form(""),
     glossary: str = Form(""),
     voice_id: str = Form("")

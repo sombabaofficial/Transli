@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 
 import { SUPPORTED_LANGUAGES, INDIAN_LANGUAGES, INTERNATIONAL_LANGUAGES, getLanguageName } from '../config/languages';
+import API_BASE from '../config/api';
 
 const SPEED_MIN = 0.5;
 const SPEED_MAX = 2.0;
@@ -272,7 +273,7 @@ export default function QuickTranslate({
       formData.append('tts_provider', ttsProvider || 'elevenlabs');
       if (preferLocalMode) formData.append('prefer_local', 'true');
 
-      const response = await fetch('http://localhost:8000/api/translate-multi', {
+      const response = await fetch('${API_BASE}/api/translate-multi', {
         method: 'POST',
         body: formData,
         signal: controller.signal,
@@ -302,6 +303,15 @@ export default function QuickTranslate({
       let parsedDetectedLang = null;
 
       const fetchedResults = data.translations.map(t_obj => {
+        if (t_obj.error) {
+          return {
+            lang: t_obj.lang,
+            translation: t_obj.error,
+            audioUrl: null,
+            isError: true
+          };
+        }
+
         let actualTranslation = t_obj.translated_text;
         
         if (autoDetect && translationProvider === 'gemini') {
@@ -318,7 +328,8 @@ export default function QuickTranslate({
         return {
           lang: t_obj.lang,
           translation: actualTranslation,
-          audioUrl: t_obj.audio_base64 ? `data:audio/mpeg;base64,${t_obj.audio_base64}` : null
+          audioUrl: t_obj.audio_base64 ? `data:audio/mpeg;base64,${t_obj.audio_base64}` : null,
+          isError: false
         };
       });
 
@@ -327,11 +338,24 @@ export default function QuickTranslate({
       if (parsedDetectedLang) setDetectedLang(parsedDetectedLang);
       setResults(fetchedResults);
       setTiming(data.timing || null);
-      setStatus('Completed');
-      setErrorMsg('');
 
-      // Auto-play first result unconditionally
-      if (fetchedResults[0]?.audioUrl) {
+      const hasErrors = fetchedResults.some(r => r.isError);
+      const allErrors = fetchedResults.every(r => r.isError);
+
+      if (allErrors) {
+        setStatus('Error');
+        setErrorMsg('All translation requests failed. Please check your API key configuration in settings or backend .env file.');
+      } else {
+        setStatus('Completed');
+        if (hasErrors) {
+          setErrorMsg('Some translations failed. Check individual target language cards below.');
+        } else {
+          setErrorMsg('');
+        }
+      }
+
+      // Auto-play first result unconditionally if it didn't fail
+      if (fetchedResults[0]?.audioUrl && !fetchedResults[0].isError) {
         setTimeout(() => playAudio(0, fetchedResults[0].audioUrl), 300);
       }
 
@@ -855,34 +879,53 @@ export default function QuickTranslate({
                   <span className="text-[11px] font-black text-secondary tracking-widest uppercase">{langName(result.lang)}</span>
                 </div>
                 <div className="p-6">
-                  <p className="text-on-surface text-lg leading-relaxed font-medium">{result.translation}</p>
-                </div>
-                <div className="bg-surface-container-lowest/80 border-t border-outline-variant/10 px-6 py-3 flex items-center gap-6">
-                  {result.audioUrl ? (
-                    <div className="flex items-center gap-2 text-on-surface-variant">
-                      <button className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${playingIdx === idx ? 'bg-secondary/20 text-secondary' : 'hover:bg-surface-container-high hover:text-on-surface'}`} onClick={() => playingIdx === idx ? pauseAudio(idx) : playAudio(idx, result.audioUrl)}>
-                        <span className="material-symbols-outlined text-[16px]">{playingIdx === idx ? 'pause' : 'play_arrow'}</span>
-                      </button>
-                      <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container-high hover:text-on-surface transition-all" onClick={() => restartAudio(idx, result.audioUrl)}>
-                        <span className="material-symbols-outlined text-[16px]">replay</span>
-                      </button>
+                  {result.isError ? (
+                    <div className="flex items-start gap-4 bg-error-container/10 border border-error/25 p-5 rounded-2xl">
+                      <div className="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center shrink-0 border border-error/20">
+                        <AlertCircle size={20} className="text-error" />
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <h4 className="text-sm font-bold text-error m-0">Translation Engine Failure</h4>
+                        <p className="text-[#E2E2E8] text-xs leading-relaxed m-0 opacity-80 select-text font-mono bg-surface-container-highest/20 p-3 rounded-lg border border-outline-variant/5">
+                          {result.translation}
+                        </p>
+                        <div className="bg-surface-container-highest/40 p-3 rounded-lg border border-outline-variant/5 mt-3 text-[11px] leading-relaxed text-on-surface-variant font-medium">
+                          <span className="text-primary font-bold">Recommended Action:</span> Since cloud providers require configuration, you can go to the <strong>Settings</strong> page in the sidebar and switch your engines to local/offline providers (such as <strong>Meta NLLB</strong> for translation and <strong>Piper</strong> or <strong>gTTS</strong> for text-to-speech) which do not require API keys.
+                        </div>
+                      </div>
                     </div>
                   ) : (
-                    <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">No Audio</span>
+                    <p className="text-on-surface text-lg leading-relaxed font-medium">{result.translation}</p>
                   )}
-                  <div className="w-px h-4 bg-outline-variant/20"></div>
-                  <button className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest hover:text-secondary transition-colors flex items-center gap-1.5" onClick={() => handleCopy(result.translation, `result-${idx}`)}>
-                    <span className="material-symbols-outlined text-[14px]">{copiedId === `result-${idx}` ? 'check' : 'content_copy'}</span> {copiedId === `result-${idx}` ? 'Copied' : 'Copy'}
-                  </button>
-                  {result.audioUrl && (
-                    <button className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest hover:text-secondary transition-colors flex items-center gap-1.5" onClick={() => downloadMp3(result.audioUrl, `translation_${result.lang}.mp3`)}>
-                      <span className="material-symbols-outlined text-[14px]">download</span> MP3
-                    </button>
-                  )}
-                  <button className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest hover:text-secondary transition-colors flex items-center gap-1.5" onClick={() => downloadTxt(result.translation, `translation_${result.lang}.txt`)}>
-                    <span className="material-symbols-outlined text-[14px]">download</span> TXT
-                  </button>
                 </div>
+                {!result.isError && (
+                  <div className="bg-surface-container-lowest/80 border-t border-outline-variant/10 px-6 py-3 flex items-center gap-6">
+                    {result.audioUrl ? (
+                      <div className="flex items-center gap-2 text-on-surface-variant">
+                        <button className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${playingIdx === idx ? 'bg-secondary/20 text-secondary' : 'hover:bg-surface-container-high hover:text-on-surface'}`} onClick={() => playingIdx === idx ? pauseAudio(idx) : playAudio(idx, result.audioUrl)}>
+                          <span className="material-symbols-outlined text-[16px]">{playingIdx === idx ? 'pause' : 'play_arrow'}</span>
+                        </button>
+                        <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container-high hover:text-on-surface transition-all" onClick={() => restartAudio(idx, result.audioUrl)}>
+                          <span className="material-symbols-outlined text-[16px]">replay</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">No Audio</span>
+                    )}
+                    <div className="w-px h-4 bg-outline-variant/20"></div>
+                    <button className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest hover:text-secondary transition-colors flex items-center gap-1.5" onClick={() => handleCopy(result.translation, `result-${idx}`)}>
+                      <span className="material-symbols-outlined text-[14px]">{copiedId === `result-${idx}` ? 'check' : 'content_copy'}</span> {copiedId === `result-${idx}` ? 'Copied' : 'Copy'}
+                    </button>
+                    {result.audioUrl && (
+                      <button className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest hover:text-secondary transition-colors flex items-center gap-1.5" onClick={() => downloadMp3(result.audioUrl, `translation_${result.lang}.mp3`)}>
+                        <span className="material-symbols-outlined text-[14px]">download</span> MP3
+                      </button>
+                    )}
+                    <button className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest hover:text-secondary transition-colors flex items-center gap-1.5" onClick={() => downloadTxt(result.translation, `translation_${result.lang}.txt`)}>
+                      <span className="material-symbols-outlined text-[14px]">download</span> TXT
+                    </button>
+                  </div>
+                )}
               </div>
             )) : (
               <div className="bg-surface-container-lowest/30 rounded-2xl border border-dashed border-outline-variant/20 flex-1 flex flex-col items-center justify-center p-8 opacity-50 min-h-[200px]">

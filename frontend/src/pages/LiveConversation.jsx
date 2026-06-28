@@ -5,6 +5,7 @@ import {
   FileText, Volume2, Trash2, RefreshCw, Save
 } from 'lucide-react';
 import { INDIAN_LANGUAGES, INTERNATIONAL_LANGUAGES, getLanguageName } from '../config/languages';
+import API_BASE from '../config/api';
 
 // ── Constants ────────────────────────────────────────────────────────────
 const SPEED_MIN  = 0.5;
@@ -250,7 +251,7 @@ export default function LiveConversation({
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/translate', {
+      const response = await fetch('${API_BASE}/api/translate', {
         method: 'POST',
         body: formData,
         signal: controller.signal,
@@ -365,7 +366,7 @@ export default function LiveConversation({
     formData.append('text', fullTranscript);
     formData.append('translation_provider', translationProvider);
     try {
-      const res  = await fetch('http://localhost:8000/api/summarize', { 
+      const res  = await fetch('${API_BASE}/api/summarize', { 
         method: 'POST', body: formData, signal: controller.signal 
       });
       if (!res.ok) {
